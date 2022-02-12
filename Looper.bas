@@ -16,8 +16,7 @@ End Sub
 Public Sub AddHandler(ByRef Handler As IHandler)
 If MainLooper Is Nothing Then Set MainLooper = New VBALooper.CallBackLooper
 MainLooper.AddHandler Handler
-Dim CallParam As String: CallParam = "'Start """ & CStr(ObjPtr(MainLooper)) & """ '"
-If Not MainLooper.LoopStatus Then Application.OnTime Now(), CallParam
+If Not MainLooper.LoopStatus Then Application.OnTime Now(), "'Start """ & CStr(ObjPtr(MainLooper)) & """ '"
 End Sub
 
 Public Sub RemoveHandler(ByRef Handler As IHandler)
@@ -28,3 +27,4 @@ End Sub
 Public Property Get LoopActive() As Boolean
 LoopActive = MainLooper.LoopStatus
 End Property
+
