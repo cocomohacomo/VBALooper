@@ -1,30 +1,49 @@
 Attribute VB_Name = "Looper"
 Option Explicit
 
-Private MainLooper As VBALooper.CallBackLooper
+Private Declare PtrSafe Sub Sleep Lib "kernel32" (ByVal Milliseconds As Long)
 
-Public Sub Start(ByVal MainLoopPtr As String)
-If CLngPtr(MainLoopPtr) <> ObjPtr(MainLooper) Then Exit Sub
-MainLooper.StartCallback
+Private Handlers As Object
+Private LoopActive As Boolean
+
+Public Sub Start(ByVal HandlersPtr As String)
+If CLngPtr(HandlersPtr) = ObjPtr(Handlers) Then: LoopActive = True: Call Looper
 End Sub
 
 Public Sub Refresh()
-If MainLooper Is Nothing Then Exit Sub
-MainLooper.RefreshHandler
+If Handlers Is Nothing Then Exit Sub
+LoopActive = False
+Handlers.RemoveAll
+Set Handlers = Nothing
 End Sub
 
 Public Sub AddHandler(ByRef Handler As IHandler)
-If MainLooper Is Nothing Then Set MainLooper = New VBALooper.CallBackLooper
-MainLooper.AddHandler Handler
-If Not MainLooper.LoopStatus Then Application.OnTime Now(), "'Start """ & CStr(ObjPtr(MainLooper)) & """ '"
+If Handlers Is Nothing Then Set Handlers = CreateObject("Scripting.Dictionary")
+If Not Handlers.Exists(Handler) Then Handlers.Add Handler, vbNullString
+If Not LoopActive Then Application.OnTime Now(), "'Start """ & CStr(ObjPtr(Handlers)) & """ '"
 End Sub
 
 Public Sub RemoveHandler(ByRef Handler As IHandler)
-If MainLooper Is Nothing Then Exit Sub
-If MainLooper.RemoveHandler(Handler) = 0 Then MainLooper.StopCallBack
+If Handlers Is Nothing Then Exit Sub
+If Handlers.Exists(Handler) Then Handlers.Remove Handler
+If Handlers.Count = 0 Then LoopActive = False
 End Sub
 
-Public Property Get LoopActive() As Boolean
-LoopActive = MainLooper.LoopStatus
-End Property
-
+Private Sub Looper()
+Dim Handler As IHandler
+Do
+    For Each Handler In Handlers
+        Handler.CallBack
+        If Not LoopActive Then Exit Do
+        If Handlers Is Nothing Then Exit Do
+        If Handlers.Count = 0 Then Exit Do
+        If Handler Is Nothing Then Exit For
+        VBA.DoEvents
+        Sleep 1&
+    Next
+    If Not LoopActive Then Exit Do
+    If Handlers Is Nothing Then Exit Do
+    If Handlers.Count = 0 Then Exit Do
+Loop
+LoopActive = False
+End Sub
