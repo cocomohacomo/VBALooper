@@ -34,16 +34,21 @@ Dim Handler As IHandler
 Do
     For Each Handler In Handlers
         Handler.CallBack
-        If Not LoopActive Then Exit Do
-        If Handlers Is Nothing Then Exit Do
-        If Handlers.Count = 0 Then Exit Do
-        If Handler Is Nothing Then Exit For
-        VBA.DoEvents
-        Sleep 1&
+        Select Case True
+            Case Handlers Is Nothing: Exit Do
+            Case Handlers.Count = 0: Exit Do
+            Case Handler Is Nothing: Exit For
+            Case Not LoopActive: Exit Do
+            Case Else
+                VBA.DoEvents
+                Sleep 1&
+        End Select
     Next
-    If Not LoopActive Then Exit Do
-    If Handlers Is Nothing Then Exit Do
-    If Handlers.Count = 0 Then Exit Do
+    Select Case True
+        Case Not LoopActive: Exit Do
+        Case Handlers Is Nothing: Exit Do
+        Case Handlers.Count = 0: Exit Do
+    End Select
 Loop
 LoopActive = False
 End Sub
