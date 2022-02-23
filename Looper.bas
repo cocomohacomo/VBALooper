@@ -12,8 +12,8 @@ End Sub
 
 Public Sub Refresh()
 If Handlers Is Nothing Then Exit Sub
-Handlers.RemoveAll
 LoopStop = True
+Handlers.RemoveAll
 Set Handlers = Nothing
 End Sub
 
@@ -36,6 +36,7 @@ Do
         Handler.CallBack
         If Handlers Is Nothing Then Exit Do
         If Handlers.Count = 0 Then Exit Do
+        If Handler Is Nothing Then Exit For
         If LoopStop Then Exit Do
     Next
     If Handlers Is Nothing Then Exit Do
@@ -43,5 +44,4 @@ Do
     If LoopStop Then Exit Do
     Sleep CLng(VBA.DoEvents + 1)
 Loop
-LoopStop = True
 End Sub
