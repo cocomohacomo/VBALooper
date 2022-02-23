@@ -4,29 +4,29 @@ Option Explicit
 Private Declare PtrSafe Sub Sleep Lib "kernel32" (ByVal Milliseconds As Long)
 
 Private Handlers As Object
-Private LoopActive As Boolean
+Private LoopStop As Boolean
 
 Public Sub Start(ByVal HandlersPtr As String)
-If CLngPtr(HandlersPtr) = ObjPtr(Handlers) Then: LoopActive = True: Call Looper
+If CLngPtr(HandlersPtr) = ObjPtr(Handlers) Then: LoopStop = False: Call Looper
 End Sub
 
 Public Sub Refresh()
 If Handlers Is Nothing Then Exit Sub
-LoopActive = False
 Handlers.RemoveAll
+LoopStop = True
 Set Handlers = Nothing
 End Sub
 
 Public Sub AddHandler(ByRef Handler As IHandler)
 If Handlers Is Nothing Then Set Handlers = CreateObject("Scripting.Dictionary")
 If Not Handlers.Exists(Handler) Then Handlers.Add Handler, vbNullString
-If Not LoopActive Then Application.OnTime Now(), "'Start """ & CStr(ObjPtr(Handlers)) & """ '"
+If LoopStop Then Application.OnTime Now(), "'Start """ & CStr(ObjPtr(Handlers)) & """ '"
 End Sub
 
 Public Sub RemoveHandler(ByRef Handler As IHandler)
 If Handlers Is Nothing Then Exit Sub
 If Handlers.Exists(Handler) Then Handlers.Remove Handler
-If Handlers.Count = 0 Then LoopActive = False
+If Handlers.Count = 0 Then LoopStop = True
 End Sub
 
 Private Sub Looper()
@@ -34,21 +34,14 @@ Dim Handler As IHandler
 Do
     For Each Handler In Handlers
         Handler.CallBack
-        Select Case True
-            Case Handlers Is Nothing: Exit Do
-            Case Handlers.Count = 0: Exit Do
-            Case Handler Is Nothing: Exit For
-            Case Not LoopActive: Exit Do
-            Case Else
-                VBA.DoEvents
-                Sleep 1&
-        End Select
+        If Handlers Is Nothing Then Exit Do
+        If Handlers.Count = 0 Then Exit Do
+        If LoopStop Then Exit Do
     Next
-    Select Case True
-        Case Not LoopActive: Exit Do
-        Case Handlers Is Nothing: Exit Do
-        Case Handlers.Count = 0: Exit Do
-    End Select
+    If Handlers Is Nothing Then Exit Do
+    If Handlers.Count = 0 Then Exit Do
+    If LoopStop Then Exit Do
+    Sleep CLng(VBA.DoEvents + 1)
 Loop
-LoopActive = False
+LoopStop = True
 End Sub
