@@ -30,19 +30,18 @@ If Handlers.Count = 0 Then LoopaActive = False
 End Sub
 
 Private Sub Looper()
-Dim Handler As IHandler
+Dim Handles As Variant
+Dim i As Long
 Do
-    For Each Handler In Handlers
-        Handler.CallBack
-        If Handlers Is Nothing Then Exit Do
-        If Handlers.Count = 0 Then Exit Do
-        If Not LoopaActive Then Exit Do
-        If Handler Is Nothing Then Exit For
-    Next
+    If Not LoopaActive Then Exit Do
     If Handlers Is Nothing Then Exit Do
     If Handlers.Count = 0 Then Exit Do
-    If Not LoopaActive Then Exit Do
-    Sleep CLng(VBA.DoEvents + 1)
+    Handles = Handlers.Keys
+    For i = 0 To UBound(Handles)
+        Handles(i).CallBack
+    Next
+    Sleep 1&
+    VBA.DoEvents
 Loop
 LoopaActive = False
 End Sub
