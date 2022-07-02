@@ -20,7 +20,7 @@ End Sub
 Public Sub AddHandler(ByRef Handler As IHandler)
 If Handlers Is Nothing Then Set Handlers = CreateObject("Scripting.Dictionary")
 If Not Handlers.Exists(Handler) Then Handlers.Add Handler, vbNullString
-If Not LoopActive Then Application.OnTime Now(), "'Start """ & CStr(ObjPtr(Handlers)) & """ '"
+If Not LoopActive Then Application.OnTime Now(), "'Looper.Start """ & CStr(ObjPtr(Handlers)) & """ '"
 End Sub
 
 Public Sub RemoveHandler(ByRef Handler As IHandler)
@@ -38,6 +38,7 @@ Do
     If Handlers.Count = 0 Then Exit Do
     Handles = Handlers.Keys
     For i = 0 To UBound(Handles)
+        If Handles(i) Is Nothing Then Exit Sub
         Handles(i).CallBack
     Next
     Sleep 1&
