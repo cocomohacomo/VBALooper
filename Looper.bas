@@ -3,16 +3,16 @@ Option Explicit
 
 Private Declare PtrSafe Sub Sleep Lib "kernel32" (ByVal Milliseconds As Long)
 
-Private LoopaActive As Boolean 'Default:False
+Private LoopActive As Boolean 'Default:False
 Private Handlers As Object
 
 Public Sub Start(ByVal HandlersPtr As String)
-If CLngPtr(HandlersPtr) = ObjPtr(Handlers) Then: LoopaActive = True: Call Looper
+If CLngPtr(HandlersPtr) = ObjPtr(Handlers) Then: LoopActive = True: Call Looper
 End Sub
 
 Public Sub Refresh()
 If Handlers Is Nothing Then Exit Sub
-LoopaActive = False
+LoopActive = False
 Handlers.RemoveAll
 Set Handlers = Nothing
 End Sub
@@ -20,13 +20,13 @@ End Sub
 Public Sub AddHandler(ByRef Handler As IHandler)
 If Handlers Is Nothing Then Set Handlers = CreateObject("Scripting.Dictionary")
 If Not Handlers.Exists(Handler) Then Handlers.Add Handler, vbNullString
-If Not LoopaActive Then Application.OnTime Now(), "'Start """ & CStr(ObjPtr(Handlers)) & """ '"
+If Not LoopActive Then Application.OnTime Now(), "'Start """ & CStr(ObjPtr(Handlers)) & """ '"
 End Sub
 
 Public Sub RemoveHandler(ByRef Handler As IHandler)
 If Handlers Is Nothing Then Exit Sub
 If Handlers.Exists(Handler) Then Handlers.Remove Handler
-If Handlers.Count = 0 Then LoopaActive = False
+If Handlers.Count = 0 Then LoopActive = False
 End Sub
 
 Private Sub Looper()
@@ -43,5 +43,5 @@ Do
     Sleep 1&
     VBA.DoEvents
 Loop
-LoopaActive = False
+LoopActive = False
 End Sub
