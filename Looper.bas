@@ -33,7 +33,7 @@ Private Sub Looper()
 Dim Handles As Variant
 Dim i As Long
 Do
-    If Not LoopaActive Then Exit Do
+    If Not LoopActive Then Exit Do
     If Handlers Is Nothing Then Exit Do
     If Handlers.Count = 0 Then Exit Do
     Handles = Handlers.Keys
